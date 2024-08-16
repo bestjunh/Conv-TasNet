@@ -1,6 +1,6 @@
 #### Conv-TasNet Setting
 name: Conv_Tasnet
-gpu_ids: [0,1,2,3,6,7]
+gpu_ids: [0,1]
 #gpu_ids: [0]
 epochs: 100
 
@@ -8,21 +8,21 @@ epochs: 100
 datasets:
   num_workers: 4
   batch_size: 20
-  fs: 8000
+  fs: 16000
   chunk_len: 4
   chunk_size: 32000 #### fs*chunk_len
   train:
-    mix_scp: /home/likai/data1/create_scp/tr_mix.scp
+    mix_scp: /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/tr_mix.scp
     ref_scp: 
-      - /home/likai/data1/create_scp/tr_s1.scp
-      - /home/likai/data1/create_scp/tr_s2.scp
-    sr: 8000
+      - /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/tr_s1.scp
+      - /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/tr_s2.scp
+    sr: 16000
   val:
-    mix_scp: /home/likai/data1/create_scp/cv_mix.scp
+    mix_scp: /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/cv_mix.scp
     ref_scp: 
-      - /home/likai/data1/create_scp/cv_s1.scp
-      - /home/likai/data1/create_scp/cv_s2.scp
-    sr: 8000
+      - /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/cv_s1.scp
+      - /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/cv_s2.scp
+    sr: 16000
 
 #### training settings: learning rate scheme, loss
 train:

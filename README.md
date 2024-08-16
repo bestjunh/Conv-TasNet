@@ -33,7 +33,7 @@ Conv-TasNet: Surpassing Ideal Time-Frequency Magnitude Masking for Speech Separa
 - If you want to adjust the network parameters and the path of the training file, please modify the **option/train/train.yml** file.
 - Training Command
    ```python
-  python train.py ./option/train/train.yml
+  python train.py --opt ./options/train/train.yml 
    ```
 
 ### Inference this model

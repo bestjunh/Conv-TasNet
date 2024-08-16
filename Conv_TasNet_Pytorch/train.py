@@ -10,7 +10,7 @@ from utils import get_logger
 
 def main():
     # Reading option
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()    
     parser.add_argument('--opt', type=str, help='Path to option YAML file.')
     args = parser.parse_args()
 
@@ -30,7 +30,7 @@ def main():
                                    ['num_workers'], chunk_size=opt['datasets']['chunk_size'], batch_size=opt['datasets']['batch_size'])
     val_loader = make_dataloader(is_train=False, data_kwargs=opt['datasets']['val'], num_workers=opt['datasets']
                                    ['num_workers'], chunk_size=opt['datasets']['chunk_size'], batch_size=opt['datasets']['batch_size'])
-    logger.info('Train data loader: {}, Test data loader: {}'.format(len(train_loader), len(val_loader)))
+    logger.info('Train data loader: {}, Test data loader: {}'.format(len(train_loader.data_loader), len(val_loader.data_loader)))
     trainer.run(train_loader,val_loader)
 
 
