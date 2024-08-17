@@ -72,9 +72,9 @@ for rt60 = RT60
                     zlim([0 roomDim(3)]);
                     view(3);
                     title(['rt60=' num2str(rt60) ', roomDim=' num2str(roomDim) ', locDelta=' num2str(locDelta)]);
-                end
-                toc
+                end                
             end
+            toc
         end
     end
 end
