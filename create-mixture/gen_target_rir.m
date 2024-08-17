@@ -1,7 +1,7 @@
 clear all;
 addpath('functions');
 
-RIRPATH = 'W:\data\albert\DB/CONV-TASNet-RIR/'
+RIRPATH = 'W:\data\albert\DB/CONV-TASNet-RIR/target/'
 upFs = 64*16000;
 N = 200;
 
@@ -45,7 +45,7 @@ for rt60 = RT60
         for locDelta_idx = 1:length(LOCDELTA)            
             locDelta = cell2mat(LOCDELTA(locDelta_idx));
             centerSensors = [roomDim(1)/2 roomDim(2)/2 1.0] + locDelta;
-            rir_path = [RIRPATH '/RT' num2str(rt60) '/ROOM' num2str(roomDim_idx) '/LOCDELTA' num2str(locDelta_idx) '/'];
+            rir_path = [RIRPATH 'RT' num2str(rt60) '/ROOM' num2str(roomDim_idx) '/LOCDELTA' num2str(locDelta_idx) '/'];
             mkdir(rir_path)
             disp(['rt60=' num2str(rt60) ', roomDim=' num2str(roomDim_idx) '/' num2str(length(ROOMDIM)) ', locDelta=' num2str(locDelta_idx) '/' num2str(length(LOCDELTA))]);
             tic
@@ -53,7 +53,7 @@ for rt60 = RT60
                 x = rand*(roomDim(1)-0.6)+0.3;
                 y = rand*(roomDim(2)-0.6)+0.3;
                 z = rand*(roomDim(3)-0.6)+0.3;
-                [r,azi,ele] = Cart2Sphe([x,y,z].');
+                [r,azi,ele] = Cart2Sphe([x-centerSensors(1),y-centerSensors(2),z-centerSensors(3)].');
 
                 generateRIR(upFs, roomDim, RT60, centerSensors, locSensors, r, azi, ele, rir_path);
 
