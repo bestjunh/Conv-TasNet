@@ -22,7 +22,7 @@ if ispc
     devPath = 'W:/';
 elseif isunix
     nasPath = '/home/nas/';
-    devPath = '/home/'
+    devPath = '/home/';
 else
     disp('Unknown operating system.');
 end
