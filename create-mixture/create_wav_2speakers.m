@@ -19,17 +19,19 @@
 
 if ispc
     nasPath = 'Z:/nas1_data/';
+    devPath = 'W:/';
 elseif isunix
     nasPath = '/home/nas/';
+    devPath = '/home/'
 else
     disp('Unknown operating system.');
 end
 
 
 data_type = {'tr','cv','tt'};
-wsj0root = [nasPath 'DB/wsj_wav/wsj0']; % YOUR_PATH/, the folder containing wsj0/
-output_dir16k='/home/data/albert/DB/wsj0-mix_20240717/2speakers/wav16k';
-output_dir8k='/home/data/albert/DB/wsj0-mix_20240717/2speakers/wav8k';
+wsj0root = [nasPath 'DB/wsj_wav/']; % YOUR_PATH/, the folder containing wsj0/
+output_dir16k=[devPath 'data/albert/DB/wsj0-mix_20240717/2speakers/wav16k'];
+output_dir8k=[devPath 'data/albert/DB/wsj0-mix_20240717/2speakers/wav8k'];
 
 min_max = {'min','max'};
 
@@ -73,7 +75,9 @@ for i_mm = 1:length(min_max)
         scaling16bit_16k = zeros(num_files,1);
         scaling16bit_8k = zeros(num_files,1);
         fprintf(1,'%s\n',[min_max{i_mm} '_' data_type{i_type}]);
+
         for i = 1:num_files
+            disp(['Creating ' num2str(i_mm) '/' num2str(length(min_max)) ' ' num2str(i_type) '/' num2str(length(data_type)) ' ' num2str(i) '/' num2str(num_files)]);
             [inwav1_dir,invwav1_name,inwav1_ext] = fileparts(C{1}{i});
             [inwav2_dir,invwav2_name,inwav2_ext] = fileparts(C{3}{i});
             fprintf(fid_s1,'%s\n',C{1}{i});
