@@ -14,8 +14,11 @@ else
     disp('Unknown operating system.');
 end
 
-% RIRPATH = [devPath 'data/albert/DB/CONV-TASNet-RIR-v2/noise/']
-RIRPATH = ['/home/dev60-data-mount/albert/DB/CONV-TASNet-RIR-v2/target/']
+RIRPATH = [devPath 'data/albert/DB/CONV-TASNet-RIR-v2/target/']
+% RIRPATH = ['/home/dev60-data-mount/albert/DB/CONV-TASNet-RIR-v2/target/']
+
+% seedValue = 123; % 원하는 시드 값
+% rng(seedValue); % 랜덤 시드 설정
 
 upFs = 3*16000;
 N = 200;
@@ -60,11 +63,25 @@ for rt60 = RT60
         for locDelta_idx = 1:length(LOCDELTA)            
             locDelta = cell2mat(LOCDELTA(locDelta_idx));
             centerSensors = [roomDim(1)/2 roomDim(2)/2 1.0] + locDelta;
-            rir_path = [RIRPATH 'RT' num2str(rt60) '/ROOM' num2str(roomDim(1)) 'x' num2str(roomDim(2)) 'x' num2str(roomDim(3)) '/LOC' num2str(locDelta(1)) 'x' num2str(locDelta(2)) 'x' num2str(locDelta(3)) '/'];
-            mkdir(rir_path)
+            rir_path = [RIRPATH 'RT' num2str(rt60) '/ROOM' num2str(roomDim(1)) 'x' num2str(roomDim(2)) 'x' num2str(roomDim(3)) '/LOC' num2str(locDelta(1)) 'x' num2str(locDelta(2)) 'x' num2str(locDelta(3)) '/'];            
+
+            % 폴더가 존재하는지 확인
+            if ~exist(rir_path, 'dir')
+                mkdir(rir_path); % 폴더가 없으면 생성
+                disp(['Folder created: ', rir_path]);
+            else
+                disp(['Folder already exists: ', rir_path]);
+            end
+
             disp(['rt60=' num2str(rt60) ', roomDim=' num2str(roomDim_idx) '/' num2str(length(ROOMDIM)) ', locDelta=' num2str(locDelta_idx) '/' num2str(length(LOCDELTA))]);
             tic
             for n = 1:N
+                rirList = dir([rir_path '*.mat']);
+                if length(rirList) >= N
+                    disp('Already generated.');
+                    break;
+                end
+
                 x = rand*(roomDim(1)-0.6)+0.3;
                 y = rand*(roomDim(2)-0.6)+0.3;
                 z = rand*(roomDim(3)-0.6)+0.3;
