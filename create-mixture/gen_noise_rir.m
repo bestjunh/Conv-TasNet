@@ -1,7 +1,7 @@
 clear all;
 close all;
 addpath('functions');
-
+%rt60=0.2, roomDim=8/20, locDelta=6/8
 RIRPATH = 'W:\data\albert\DB/CONV-TASNet-RIR/noise/'
 upFs = 64*16000;
 
@@ -58,7 +58,7 @@ for rt60 = RT60
             [r, azi, ele] = locDiffuseWall(Nx,Ny,roomDim,centerSensors,distWall);    
             Nd = size(r,2);
             for n = 1:Nd
-                generateRIR(upFs, roomDim, RT60, centerSensors, locSensors, r, azi, ele, rir_path);
+                generateRIR(upFs, roomDim, RT60, centerSensors, locSensors, r(n), azi(n), ele(n), rir_path);
             end
 
             if 0
