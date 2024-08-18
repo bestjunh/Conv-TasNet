@@ -43,6 +43,39 @@ if exist('audioread','file')
     useaudioread = 1;
 end
 
+RT60 = [0.2 0.3 0.4 0.5 0.6 0.7];
+
+ROOMDIM = {[4.01, 3.65, 2.81]
+           [6.02, 3.82, 2.53]
+           [3.35, 4.94, 2.83]
+           [4.55, 5.76, 2.61]
+           [5.33, 3.51, 2.72]
+           [4.34, 6.02, 2.55]
+           [4.55, 3.54, 2.81]
+           [4.76, 3.86, 2.74]
+           [4.87, 3.78, 2.57]
+           [5.08, 4.02, 2.64]
+           [5.94, 7.45, 2.82]
+           [7.40, 5.55, 2.87]
+           [7.13, 5.78, 2.82]
+           [7.23, 5.22, 2.91]
+           [8.12, 5.45, 3.01]
+           [8.20, 5.55, 2.89]
+           [6.63, 4.75, 2.84]
+           [6.30, 6.15, 2.92]
+           [8.40, 5.45, 2.95]
+           [8.10, 6.42, 3.00]};
+          
+
+LOCDELTA = {[-0.52 -0.15,-0.11]
+            [-0.35 -0.41 0.09]
+            [-0.16 0.38 -0.10]
+            [-0.45 0.20 0.12]
+            [0.45 -0.18 -0.14]
+            [0.55 -0.33 0.08]
+            [0.31 0.22 0.02]
+            [0.27 0.43 -0.03]};
+
 for i_mm = 1:length(min_max)
     for i_type = 1:length(data_type)
         if ~exist([output_dir16k '/' min_max{i_mm} '/' data_type{i_type}],'dir')
@@ -78,7 +111,7 @@ for i_mm = 1:length(min_max)
         scaling16bit_16k = zeros(num_files,1);
         scaling16bit_8k = zeros(num_files,1);
         fprintf(1,'%s\n',[min_max{i_mm} '_' data_type{i_type}]);
-
+        tic
         for i = 1:num_files
             disp(['Creating ' num2str(i_mm) '/' num2str(length(min_max)) ' ' num2str(i_type) '/' num2str(length(data_type)) ' ' num2str(i) '/' num2str(num_files)]);
             [inwav1_dir,invwav1_name,inwav1_ext] = fileparts(C{1}{i});
@@ -91,9 +124,25 @@ for i_mm = 1:length(min_max)
             fprintf(fid_m,'%s\n',mix_name);
 
             % load RIRs
-            h = load([rirroot 'target/RT0.2/ROOM1/LOCDELTA1/dist_0.34684_angle_80.3487_82.1471.mat']);
+            % rtIdx = 1;
+            rtIdx = randi(length(RT60));
+            roomIdx = randi(length(ROOMDIM));
+            micIdx = randi(length(LOCDELTA));
+            
+            targetRIRPath = [rirroot 'target/RT' num2str(RT60(rtIdx)) '/ROOM' num2str(roomIdx) '/LOCDELTA' num2str(micIdx) '/'];
+            rirList = dir(targetRIRPath);rirList = rirList(3:end);
+
+            rir1Idx = randi(length(rirList));
+            while(1)
+                rir2Idx = randi(length(rirList));
+                if rir1Idx ~= rir2Idx
+                    break
+                end
+            end
+            
+            h = load([targetRIRPath rirList(rir1Idx).name]);
             h1 = h.h;
-            h = load([rirroot 'target/RT0.2/ROOM1/LOCDELTA1/dist_0.43175_angle_-0.34723_73.0313.mat']);
+            h = load([targetRIRPath rirList(rir2Idx).name]);
             h2 = h.h;
             minLength = min(length(h1),length(h2));
             h1 = h1(1:minLength);
@@ -209,12 +258,12 @@ for i_mm = 1:length(min_max)
                 wavwrite(mix_16k,fs,[output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/mix/' mix_name '.wav']);
             end
             
-            if mod(i,10)==0
-                fprintf(1,'.');
-                if mod(i,200)==0
-                    fprintf(1,'\n');
-                end
-            end
+            % if mod(i,10)==0
+            %     fprintf(1,'.');
+            %     if mod(i,200)==0
+            %         fprintf(1,'\n');
+            %     end
+            % end
             
         end
         save([output_dir8k  '/' min_max{i_mm} '/' data_type{i_type} '/scaling.mat'],'scaling_8k','scaling16bit_8k');
@@ -224,5 +273,6 @@ for i_mm = 1:length(min_max)
         fclose(fid_s1);
         fclose(fid_s2);
         fclose(fid_m);
+        toc
     end
 end
