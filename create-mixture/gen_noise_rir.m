@@ -1,8 +1,18 @@
 clear all;
 close all;
 addpath('functions');
-%rt60=0.2, roomDim=8/20, locDelta=6/8
-RIRPATH = 'W:\data\albert\DB/CONV-TASNet-RIR/noise/'
+
+if ispc
+    nasPath = 'Z:/nas1_data/';
+    devPath = 'W:/';
+elseif isunix
+    nasPath = '/home/nas/';
+    devPath = '/home/';
+else
+    disp('Unknown operating system.');
+end
+
+RIRPATH = [devPath 'data/albert/DB/CONV-TASNet-RIR-v2/noise/']
 upFs = 64*16000;
 
 RT60 = [0.2 0.3 0.4 0.5 0.6 0.7];
@@ -44,21 +54,34 @@ Nx = 4;
 Ny = 3;
 distWall = 0.1;
 
+i = 1;
+
 for rt60 = RT60
     for roomDim_idx = 1:length(ROOMDIM)
         roomDim = cell2mat(ROOMDIM(roomDim_idx));
         for locDelta_idx = 1:length(LOCDELTA)
             locDelta = cell2mat(LOCDELTA(locDelta_idx));
             centerSensors = [roomDim(1)/2 roomDim(2)/2 1.0] + locDelta;
-            rir_path = [RIRPATH 'RT' num2str(rt60) '/ROOM' num2str(roomDim_idx) '/LOCDELTA' num2str(locDelta_idx) '/'];
+            rir_path = [RIRPATH 'RT' num2str(rt60) '/ROOM' num2str(roomDim(1)) 'x' num2str(roomDim(2)) 'x' num2str(roomDim(3)) '/LOC' num2str(locDelta(1)) 'x' num2str(locDelta(2)) 'x' num2str(locDelta(3)) '/'];
             mkdir(rir_path)
             disp(['rt60=' num2str(rt60) ', roomDim=' num2str(roomDim_idx) '/' num2str(length(ROOMDIM)) ', locDelta=' num2str(locDelta_idx) '/' num2str(length(LOCDELTA))]);
-            tic
+            
 
             [r, azi, ele] = locDiffuseWall(Nx,Ny,roomDim,centerSensors,distWall);    
             Nd = size(r,2);
             for n = 1:Nd
-                generateRIR(upFs, roomDim, RT60, centerSensors, locSensors, r(n), azi(n), ele(n), rir_path);
+                parList(i).upFs = upFs;
+                parList(i).roomDim = roomDim;
+                parList(i).RT60 = rt60;
+                parList(i).centerSensors = centerSensors;
+                parList(i).locSensors = locSensors;
+                parList(i).r = r(n);
+                parList(i).azi = azi(n);
+                parList(i).ele = ele(n);
+                parList(i).rir_path = rir_path;
+                
+                % generateRIR(upFs, roomDim, RT60, centerSensors, locSensors, r(n), azi(n), ele(n), rir_path);
+                i = i + 1;
             end
 
             if 0
@@ -80,8 +103,26 @@ for rt60 = RT60
                 view(3);
                 title(['rt60=' num2str(rt60) ', roomDim=' num2str(roomDim) ', locDelta=' num2str(locDelta)]);
             end
-
-            toc
+            
         end
     end
+end
+
+
+% 기존 병렬 풀 종료
+poolobj = gcp('nocreate');
+if ~isempty(poolobj)
+    delete(poolobj);
+end
+
+% 새로운 병렬 풀을 워커 수와 함께 시작
+numWorkers = 32;
+parpool('local', numWorkers);
+
+disp(['Parallel pool restarted with ', num2str(numWorkers), ' workers.']);
+
+save('noise_rir_parList.mat', 'parList');
+parfor i = 1:length(parList)
+    disp(['Generating RIR ' num2str(i) '/' num2str(length(parList))]);
+    generateRIR(parList(i).upFs, parList(i).roomDim, parList(i).RT60, parList(i).centerSensors, parList(i).locSensors, parList(i).r, parList(i).azi, parList(i).ele, parList(i).rir_path);
 end
