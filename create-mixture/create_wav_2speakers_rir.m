@@ -32,7 +32,7 @@ end
 
 data_type = {'tr','cv','tt'};
 wsj0root = [nasPath 'DB/wsj_wav/']; % YOUR_PATH/, the folder containing wsj0/
-rirroot = [devPath 'data/albert/DB/CONV-TASNet-RIR/'];
+rirroot = [devPath 'data/albert/DB/CONV-TASNet-RIR-v2/'];
 output_dir16k=[devPath 'data/albert/DB/wsj0-mix_20240818_rir/2speakers/wav16k'];
 output_dir8k=[devPath 'data/albert/DB/wsj0-mix_20240818_rir/2speakers/wav8k'];
 
@@ -90,6 +90,8 @@ for i_mm = 1:length(min_max)
         status = mkdir([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s1/']); %#ok<NASGU>
         status = mkdir([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s2/']); %#ok<NASGU>
         status = mkdir([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/mix/']);
+        status = mkdir([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s1_dry/']); %#ok<NASGU>
+        status = mkdir([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s2_dry/']); %#ok<NASGU>
                 
         TaskFile = ['mix_2_spk_' data_type{i_type} '.txt'];
         fid=fopen(TaskFile,'r');
@@ -124,12 +126,15 @@ for i_mm = 1:length(min_max)
             fprintf(fid_m,'%s\n',mix_name);
 
             % load RIRs
-            % rtIdx = 1;
+            % rtIdx = 6;
+            % roomIdx = 1;
+            % micIdx = 1;
             rtIdx = randi(length(RT60));
             roomIdx = randi(length(ROOMDIM));
             micIdx = randi(length(LOCDELTA));
-            
-            targetRIRPath = [rirroot 'target/RT' num2str(RT60(rtIdx)) '/ROOM' num2str(roomIdx) '/LOCDELTA' num2str(micIdx) '/'];
+            roomDim = cell2mat(ROOMDIM(roomIdx));
+            locDelta = cell2mat(LOCDELTA(micIdx));
+            targetRIRPath = [rirroot 'target/RT' num2str(RT60(rtIdx)) '/ROOM' num2str(roomDim(1)) 'x' num2str(roomDim(2)) 'x' num2str(roomDim(3)) '/LOC' num2str(locDelta(1)) 'x' num2str(locDelta(2)) 'x' num2str(locDelta(3)) '/'];
             rirList = dir(targetRIRPath);rirList = rirList(3:end);
 
             rir1Idx = randi(length(rirList));
@@ -160,10 +165,9 @@ for i_mm = 1:length(min_max)
                 s2       = wavread([wsj0root C{3}{i}]);            
             end
             
-            origScale = max(max(abs(s1)),max(abs(s2)));
             
             % Convolve with RIRs
-            upFs = 64*16000;
+            upFs = 3*16000;
             s1_up = resample(s1,upFs,fs);
             s2_up = resample(s2,upFs,fs);
             s1_up_rir = fft_filter(h1,1,s1_up);
@@ -171,59 +175,86 @@ for i_mm = 1:length(min_max)
 
             
             % resample, normalize 8 kHz file, save scaling factor
-            s1_8k=resample(s1_up_rir,fs8k,upFs);
-            [s1_8k,lev1]=activlev(s1_8k,fs8k,'n'); % y_norm = y /sqrt(lev);
-            s2_8k=resample(s2_up_rir,fs8k,upFs);
-            [s2_8k,lev2]=activlev(s2_8k,fs8k,'n');
+            s1_8k_rir=resample(s1_up_rir,fs8k,upFs);
+            [s1_8k_rir,lev1]=activlev(s1_8k_rir,fs8k,'n'); % y_norm = y /sqrt(lev);
+            s2_8k_rir=resample(s2_up_rir,fs8k,upFs);
+            [s2_8k_rir,lev2]=activlev(s2_8k_rir,fs8k,'n');
+            s1_8k = resample(s1,fs,fs8k);
+            s2_8k = resample(s2,fs,fs8k);
             
             weight_1=10^(inwav1_snr/20);
             weight_2=10^(inwav2_snr/20);
             
-            s1_8k = weight_1 * s1_8k;
-            s2_8k = weight_2 * s2_8k;
+            s1_8k_rir = weight_1 * s1_8k_rir;
+            s2_8k_rir = weight_2 * s2_8k_rir;
+            s1_8k = weight_1*s1_8k;
+            s2_8k = weight_2*s2_8k;
             
             switch min_max{i_mm}
                 case 'max'
-                    mix_8k_length = max(length(s1_8k),length(s2_8k));
+                    mix_8k_length = max(length(s1_8k_rir),length(s2_8k_rir));
+                    s1_8k_rir = cat(1,s1_8k_rir,zeros(mix_8k_length - length(s1_8k_rir),1));
+                    s2_8k_rir = cat(1,s2_8k_rir,zeros(mix_8k_length - length(s2_8k_rir),1));
+
                     s1_8k = cat(1,s1_8k,zeros(mix_8k_length - length(s1_8k),1));
                     s2_8k = cat(1,s2_8k,zeros(mix_8k_length - length(s2_8k),1));
                 case 'min'
-                    mix_8k_length = min(length(s1_8k),length(s2_8k));
-                    s1_8k = s1_8k(1:mix_8k_length);
-                    s2_8k = s2_8k(1:mix_8k_length);
+                    mix_8k_length = min(length(s1_8k_rir),length(s2_8k_rir));
+                    s1_8k_rir = s1_8k_rir(1:mix_8k_length);
+                    s2_8k_rir = s2_8k_rir(1:mix_8k_length);
+                    tmp_length = min(length(s1_8k),length(s2_8k));
+                    s1_8k = s1_8k(1:tmp_length);
+                    s2_8k = s2_8k(1:tmp_length);
+                    s1_8k = cat(1,s1_8k,zeros(mix_8k_length - tmp_length,1));
+                    s2_8k = cat(1,s2_8k,zeros(mix_8k_length - tmp_length,1));
             end
-            mix_8k = s1_8k + s2_8k;
+            mix_8k = s1_8k_rir + s2_8k_rir;
                     
-            max_amp_8k = max(cat(1,abs(mix_8k(:)),abs(s1_8k(:)),abs(s2_8k(:))));
+            max_amp_8k = max(cat(1,abs(mix_8k(:)),abs(s1_8k_rir(:)),abs(s2_8k_rir(:))));
             mix_scaling_8k = 1/max_amp_8k*0.9;
+            s1_8k_rir = mix_scaling_8k * s1_8k_rir;
+            s2_8k_rir = mix_scaling_8k * s2_8k_rir;
+            mix_8k = mix_scaling_8k * mix_8k;
             s1_8k = mix_scaling_8k * s1_8k;
             s2_8k = mix_scaling_8k * s2_8k;
-            mix_8k = mix_scaling_8k * mix_8k;
             
             % apply same gain to 16 kHz file
-            s1_16k=resample(s1_up_rir,fs,upFs);
-            s2_16k=resample(s2_up_rir,fs,upFs);
+            s1_16k_rir=resample(s1_up_rir,fs,upFs);
+            s2_16k_rir=resample(s2_up_rir,fs,upFs);
+            s1_16k = resample(s1,16000,fs);
+            s2_16k = resample(s2,16000,fs);
 
+            s1_16k_rir = weight_1 * s1_16k_rir / sqrt(lev1);
+            s2_16k_rir = weight_2 * s2_16k_rir / sqrt(lev2);
             s1_16k = weight_1 * s1_16k / sqrt(lev1);
             s2_16k = weight_2 * s2_16k / sqrt(lev2);
             
             switch min_max{i_mm}
                 case 'max'
-                    mix_16k_length = max(length(s1_16k),length(s2_16k));
+                    mix_16k_length = max(length(s1_16k_rir),length(s2_16k_rir));
+                    s1_16k_rir = cat(1,s1_16k_rir,zeros(mix_16k_length - length(s1_16k_rir),1));
+                    s2_16k_rir = cat(1,s2_16k_rir,zeros(mix_16k_length - length(s2_16k_rir),1));
                     s1_16k = cat(1,s1_16k,zeros(mix_16k_length - length(s1_16k),1));
                     s2_16k = cat(1,s2_16k,zeros(mix_16k_length - length(s2_16k),1));
                 case 'min'
-                    mix_16k_length = min(length(s1_16k),length(s2_16k));
-                    s1_16k = s1_16k(1:mix_16k_length);
-                    s2_16k = s2_16k(1:mix_16k_length);
+                    mix_16k_length = min(length(s1_16k_rir),length(s2_16k_rir));
+                    s1_16k_rir = s1_16k_rir(1:mix_16k_length);
+                    s2_16k_rir = s2_16k_rir(1:mix_16k_length);
+                    tmp_length = min(length(s1_16k),length(s2_16k));
+                    s1_16k = s1_16k(1:tmp_length);
+                    s2_16k = s2_16k(1:tmp_length);
+                    s1_16k = cat(1,s1_16k,zeros(mix_16k_length - tmp_length,1));
+                    s2_16k = cat(1,s2_16k,zeros(mix_16k_length - tmp_length,1));
             end
-            mix_16k = s1_16k + s2_16k;
+            mix_16k = s1_16k_rir + s2_16k_rir;
             
-            max_amp_16k = max(cat(1,abs(mix_16k(:)),abs(s1_16k(:)),abs(s2_16k(:))));
+            max_amp_16k = max(cat(1,abs(mix_16k(:)),abs(s1_16k_rir(:)),abs(s2_16k_rir(:))));
             mix_scaling_16k = 1/max_amp_16k*0.9;
+            s1_16k_rir = mix_scaling_16k * s1_16k_rir;
+            s2_16k_rir = mix_scaling_16k * s2_16k_rir;
+            mix_16k = mix_scaling_16k * mix_16k;      
             s1_16k = mix_scaling_16k * s1_16k;
-            s2_16k = mix_scaling_16k * s2_16k;
-            mix_16k = mix_scaling_16k * mix_16k;            
+            s2_16k = mix_scaling_16k * s2_16k;      
             
             % save 8 kHz and 16 kHz mixtures, as well as
             % necessary scaling factors
@@ -237,25 +268,29 @@ for i_mm = 1:length(min_max)
             scaling16bit_8k(i)  = mix_scaling_8k;
             
             if useaudioread                          
-                s1_8k = int16(round((2^15)*s1_8k));
-                s2_8k = int16(round((2^15)*s2_8k));
+                s1_8k_rir = int16(round((2^15)*s1_8k_rir));
+                s2_8k_rir = int16(round((2^15)*s2_8k_rir));
                 mix_8k = int16(round((2^15)*mix_8k));
+                s1_16k_rir = int16(round((2^15)*s1_16k_rir));
+                s2_16k_rir = int16(round((2^15)*s2_16k_rir));
+                mix_16k = int16(round((2^15)*mix_16k));
                 s1_16k = int16(round((2^15)*s1_16k));
                 s2_16k = int16(round((2^15)*s2_16k));
-                mix_16k = int16(round((2^15)*mix_16k));
-                audiowrite([output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/s1/' mix_name '.wav'],s1_8k,fs8k);
-                audiowrite([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s1/' mix_name '.wav'],s1_16k,fs);
-                audiowrite([output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/s2/' mix_name '.wav'],s2_8k,fs8k);
-                audiowrite([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s2/' mix_name '.wav'],s2_16k,fs);
+                audiowrite([output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/s1/' mix_name '.wav'],s1_8k_rir,fs8k);
+                audiowrite([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s1/' mix_name '.wav'],s1_16k_rir,fs);
+                audiowrite([output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/s2/' mix_name '.wav'],s2_8k_rir,fs8k);
+                audiowrite([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s2/' mix_name '.wav'],s2_16k_rir,fs);
                 audiowrite([output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/mix/' mix_name '.wav'],mix_8k,fs8k);
                 audiowrite([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/mix/' mix_name '.wav'],mix_16k,fs);
+                audiowrite([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s1_dry/' mix_name '.wav'],s1_16k,fs);
+                audiowrite([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s2_dry/' mix_name '.wav'],s2_16k,fs);
             else
-                wavwrite(s1_8k,fs8k,[output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/s1/' mix_name '.wav']); %#ok<*DWVWR>
-                wavwrite(s1_16k,fs,[output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s1/' mix_name '.wav']);
-                wavwrite(s2_8k,fs8k,[output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/s2/' mix_name '.wav']);
-                wavwrite(s2_16k,fs,[output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s2/' mix_name '.wav']);
-                wavwrite(mix_8k,fs8k,[output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/mix/' mix_name '.wav']);
-                wavwrite(mix_16k,fs,[output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/mix/' mix_name '.wav']);
+                % wavwrite(s1_8k_rir,fs8k,[output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/s1/' mix_name '.wav']); %#ok<*DWVWR>
+                % wavwrite(s1_16k_rir,fs,[output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s1/' mix_name '.wav']);
+                % wavwrite(s2_8k_rir,fs8k,[output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/s2/' mix_name '.wav']);
+                % wavwrite(s2_16k_rir,fs,[output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s2/' mix_name '.wav']);
+                % wavwrite(mix_8k,fs8k,[output_dir8k '/' min_max{i_mm} '/' data_type{i_type} '/mix/' mix_name '.wav']);
+                % wavwrite(mix_16k,fs,[output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/mix/' mix_name '.wav']);
             end
             
             % if mod(i,10)==0
