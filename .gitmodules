@@ -1,0 +1,3 @@
+[submodule "RIR-Generator"]
+	path = RIR-Generator
+	url = https://github.com/ehabets/RIR-Generator.git

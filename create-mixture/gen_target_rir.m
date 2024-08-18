@@ -1,5 +1,6 @@
 clear all;
 addpath('functions');
+addpath('../RIR-Generator');
 
 if ispc
     nasPath = 'Z:/nas1_data/';
@@ -13,7 +14,9 @@ else
     disp('Unknown operating system.');
 end
 
-RIRPATH = [devPath 'data/albert/DB/CONV-TASNet-RIR-v2/target/']
+% RIRPATH = [devPath 'data/albert/DB/CONV-TASNet-RIR-v2/noise/']
+RIRPATH = ['/home/dev60-data-mount/albert/DB/CONV-TASNet-RIR-v2/target/']
+
 upFs = 3*16000;
 N = 200;
 
