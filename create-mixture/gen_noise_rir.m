@@ -1,8 +1,20 @@
 clear all;
 close all;
 addpath('functions');
-%rt60=0.2, roomDim=8/20, locDelta=6/8
-RIRPATH = 'W:\data\albert\DB/CONV-TASNet-RIR/noise/'
+
+if ispc
+    nasPath = 'Z:/nas1_data/';
+    nas3Path = 'Y:/nas3_data/'
+    devPath = 'W:/';
+elseif isunix
+    nasPath = '/home/nas/';
+    nas3Path = '/home/nas3/';
+    devPath = '/home/';
+else
+    disp('Unknown operating system.');
+end
+
+RIRPATH = [nas3Path 'user/albert/DB/CONV-TASNet-RIR-v2/noise/']
 upFs = 64*16000;
 
 RT60 = [0.2 0.3 0.4 0.5 0.6 0.7];
@@ -50,7 +62,7 @@ for rt60 = RT60
         for locDelta_idx = 1:length(LOCDELTA)
             locDelta = cell2mat(LOCDELTA(locDelta_idx));
             centerSensors = [roomDim(1)/2 roomDim(2)/2 1.0] + locDelta;
-            rir_path = [RIRPATH 'RT' num2str(rt60) '/ROOM' num2str(roomDim_idx) '/LOCDELTA' num2str(locDelta_idx) '/'];
+            rir_path = [RIRPATH 'RT' num2str(rt60) '/ROOM' num2str(roomDim(1)) 'x' num2str(roomDim(2)) 'x' num2str(roomDim(3)) '/LOC' num2str(locDelta(1)) 'x' num2str(locDelta(2)) 'x' num2str(locDelta(3)) '/'];
             mkdir(rir_path)
             disp(['rt60=' num2str(rt60) ', roomDim=' num2str(roomDim_idx) '/' num2str(length(ROOMDIM)) ', locDelta=' num2str(locDelta_idx) '/' num2str(length(LOCDELTA))]);
             tic
@@ -58,7 +70,7 @@ for rt60 = RT60
             [r, azi, ele] = locDiffuseWall(Nx,Ny,roomDim,centerSensors,distWall);    
             Nd = size(r,2);
             for n = 1:Nd
-                generateRIR(upFs, roomDim, RT60, centerSensors, locSensors, r(n), azi(n), ele(n), rir_path);
+                generateRIR(upFs, roomDim, rt60, centerSensors, locSensors, r(n), azi(n), ele(n), rir_path);
             end
 
             if 0
