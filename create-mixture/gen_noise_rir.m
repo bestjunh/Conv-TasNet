@@ -14,8 +14,8 @@ else
     disp('Unknown operating system.');
 end
 
-RIRPATH = [nas3Path 'user/albert/DB/CONV-TASNet-RIR-v2/noise/']
-upFs = 64*16000;
+RIRPATH = [devPath 'data/albert/DB/CONV-TASNet-RIR-v2/noise/']
+upFs = 3*16000;
 
 RT60 = [0.2 0.3 0.4 0.5 0.6 0.7];
 
