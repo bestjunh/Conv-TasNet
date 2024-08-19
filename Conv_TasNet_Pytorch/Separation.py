@@ -14,7 +14,7 @@ import tqdm
 class Separation():
     def __init__(self, mix_path, yaml_path, model, gpuid):
         super(Separation, self).__init__()
-        self.mix = AudioReader(mix_path, sample_rate=8000)
+        self.mix = AudioReader(mix_path, sample_rate=16000)
         opt = parse(yaml_path, is_tain=False)
         net = ConvTasNet(**opt['net_conf'])
         dicts = torch.load(model, map_location='cpu')
@@ -25,6 +25,7 @@ class Separation():
         self.device=torch.device('cuda:{}'.format(
             gpuid[0]) if len(gpuid) > 0 else 'cpu')
         self.gpuid=tuple(gpuid)
+        
 
     def inference(self, file_path):
         with torch.no_grad():
@@ -34,10 +35,10 @@ class Separation():
                 norm = torch.norm(egs,float('inf'))
                 if len(self.gpuid) != 0:
                     ests=self.net(egs)
-                    spks=[torch.squeeze(s.detach().cpu()) for s in ests]
+                    spks=[torch.squeeze(s.detach()) for s in ests]                    
                 else:
                     ests=self.net(egs)
-                    spks=[torch.squeeze(s.detach()) for s in ests]
+                    spks=[torch.squeeze(s.detach().cpu()) for s in ests]
                 index=0
                 for s in spks:
                     s = s[:egs.shape[0]]
@@ -46,7 +47,8 @@ class Separation():
                     index += 1
                     os.makedirs(file_path+'/spk'+str(index), exist_ok=True)
                     filename=file_path+'/spk'+str(index)+'/'+key
-                    write_wav(filename, s, 8000)
+                    s = s.detach().cpu()
+                    write_wav(filename, s.unsqueeze(0), 16000)
             self.logger.info("Compute over {:d} utterances".format(len(self.mix)))
 
 
