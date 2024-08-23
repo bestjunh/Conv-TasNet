@@ -7,7 +7,6 @@ import argparse
 from utils import read_scaled_wav, quantize, fix_length, create_wham_mixes, append_or_truncate
 from wham_room import WhamRoom
 
-
 FILELIST_STUB = os.path.join('data', 'mix_2_spk_filenames_{}.csv')
 
 SINGLE_DIR = 'mix_single'
@@ -16,11 +15,10 @@ CLEAN_DIR = 'mix_clean'
 S1_DIR = 's1'
 S2_DIR = 's2'
 NOISE_DIR = 'noise'
-SUFFIXES = ['_anechoic', '_reverb']
+SUFFIXES = ['_anechoic', '_reverb','_early']
 
 MONO = True  # Generate mono audio, change to false for stereo audio
-#SPLITS = ['tr', 'cv', 'tt']
-SPLITS = ['cv']
+SPLITS = ['tr', 'cv', 'tt']
 SAMPLE_RATES = ['16k']#['16k', '8k'] # Remove element from this list to generate less data
 DATA_LEN = ['min']#['max', 'min'] # Remove element from this list to generate less data
 
@@ -88,6 +86,7 @@ def create_wham(wsj_root, wham_noise_path, output_root):
 
             anechoic = room.generate_audio(anechoic=True, fs=SAMPLE_RATES)
             reverberant = room.generate_audio(fs=SAMPLE_RATES)
+            early = room.generate_audio_early(fs=SAMPLE_RATES)
 
             for sr_i, sr_dir in enumerate(SAMPLE_RATES):
                 wav_dir = 'wav' + sr_dir
@@ -132,8 +131,12 @@ def create_wham(wsj_root, wham_noise_path, output_root):
                     s1_reverb, s2_reverb = fix_length(reverberant[sr_i][0, ch_ind, :out_len].T * s1_spatial_scaling,
                                                       reverberant[sr_i][1, ch_ind, :out_len].T * s2_spatial_scaling,
                                                       datalen_dir)
+                    
+                    s1_early, s2_early = fix_length(early[sr_i][0, ch_ind, :out_len].T * s1_spatial_scaling,
+                                                      early[sr_i][1, ch_ind, :out_len].T * s2_spatial_scaling,
+                                                      datalen_dir)
 
-                    sources = [(s1_anechoic, s2_anechoic), (s1_reverb, s2_reverb)]
+                    sources = [(s1_anechoic, s2_anechoic), (s1_reverb, s2_reverb), (s1_early, s2_early)]
                     for i_sfx, (sfx, source_pair) in enumerate(zip(SUFFIXES, sources)):
                         s1_samples, s2_samples, noise_samples = append_or_truncate(source_pair[0], source_pair[1],
                                                                                    noise_samples_full, datalen_dir,
