@@ -6,7 +6,8 @@ Requires python 3.7, and the numpy, scipy, pandas, pyroomacoustics, and pysoundf
 ```sh
 $ pip install -r requirements.txt
 ```
-
+pyrooomacoustics requires downgrade to 0.3.1 after recent version installation
+Requires numpy upgrade to debug with matplotlib (originally 1.19.1)
 ## Prerequisites
 
 This requires the wsj0 (https://catalog.ldc.upenn.edu/LDC93S6A/) dataset,
