@@ -50,6 +50,8 @@ class AudioReader(object):
 
     def _load(self, key):
         src, sr = read_wav(self.index_dict[key], return_rate=True)
+        if src.ndim > 1:
+            src = src[0,:]
         if self.sample_rate is not None and sr != self.sample_rate:
             raise RuntimeError('SampleRate mismatch: {:d} vs {:d}'.format(
                 sr, self.sample_rate))
