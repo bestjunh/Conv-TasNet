@@ -120,9 +120,12 @@ for i_mm = 1:length(min_max)
         fprintf(1,'%s\n',[min_max{i_mm} '_' data_type{i_type}]);
 
         noiseWAVList = dir([noiseroot data_type{i_type}]);noiseWAVList = noiseWAVList(3:end);
+
+
+
         tic
-        for i = 1:num_files
-            disp(['Creating ' num2str(i_mm) '/' num2str(length(min_max)) ' ' num2str(i_type) '/' num2str(length(data_type)) ' ' num2str(i) '/' num2str(num_files)]);
+        for i = randperm(num_files)%1:num_files
+            
             [inwav1_dir,invwav1_name,inwav1_ext] = fileparts(C{1}{i});
             [inwav2_dir,invwav2_name,inwav2_ext] = fileparts(C{3}{i});
             fprintf(fid_s1,'%s\n',C{1}{i});
@@ -131,6 +134,13 @@ for i_mm = 1:length(min_max)
             inwav2_snr = C{4}(i);
             mix_name = [invwav1_name,'_',num2str(inwav1_snr),'_',invwav2_name,'_',num2str(inwav2_snr)];
             fprintf(fid_m,'%s\n',mix_name);
+
+            if exist([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s1/' mix_name '.wav'],'file') == 2
+                disp(['Already exist: ' num2str(i_mm) '/' num2str(length(min_max)) ' ' num2str(i_type) '/' num2str(length(data_type)) ' ' num2str(i) '/' num2str(num_files)]);
+                continue
+            else
+                disp(['Creating: ' num2str(i_mm) '/' num2str(length(min_max)) ' ' num2str(i_type) '/' num2str(length(data_type)) ' ' num2str(i) '/' num2str(num_files)]);
+            end
 
             % load RIRs
             
