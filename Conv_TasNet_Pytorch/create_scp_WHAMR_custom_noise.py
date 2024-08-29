@@ -8,13 +8,13 @@ test_mix_scp = 'tt_mix.scp'
 test_s1_scp = 'tt_s1.scp'
 test_s2_scp = 'tt_s2.scp'
 
-train_mix = '/home/data/albert/DB/WHAMR_early_v2/wav16k/min/tr/mix_both_reverb'
-train_s1 = '/home/data/albert/DB/WHAMR_early_v2/wav16k/min/tr/s1_reverb'
-train_s2 = '/home/data/albert/DB/WHAMR_early_v2/wav16k/min/tr/s2_reverb'
+train_mix = '/home/data/albert/DB/wsj0-mix_20240828_rir/2speakers_noise/wav16k/min/tr/mix'
+train_s1 = '/home/data/albert/DB/wsj0-mix_20240828_rir/2speakers_noise/wav16k/min/tr/s1_dry'
+train_s2 = '/home/data/albert/DB/wsj0-mix_20240828_rir/2speakers_noise/wav16k/min/tr/s2_dry'
 
-test_mix = '/home/data/albert/DB/WHAMR_early_v2/wav16k/min/tt/mix_both_reverb'
-test_s1 = '/home/data/albert/DB/WHAMR_early_v2/wav16k/min/tt/s1_reverb'
-test_s2 = '/home/data/albert/DB/WHAMR_early_v2/wav16k/min/tt/s2_reverb'
+test_mix = '/home/data/albert/DB/wsj0-mix_20240828_rir/2speakers_noise/wav16k/min/tt/mix'
+test_s1 = '/home/data/albert/DB/wsj0-mix_20240828_rir/2speakers_noise/wav16k/min/tt/s1_dry'
+test_s2 = '/home/data/albert/DB/wsj0-mix_20240828_rir/2speakers_noise/wav16k/min/tt/s2_dry'
 
 tr_mix = open(train_mix_scp,'w')
 for root, dirs, files in os.walk(train_mix):
@@ -68,9 +68,9 @@ cv_mix_scp = 'cv_mix.scp'
 cv_s1_scp = 'cv_s1.scp'
 cv_s2_scp = 'cv_s2.scp'
 
-cv_mix = '/home/data/albert/DB/WHAMR_early_v2/wav16k/min/cv/mix_both_reverb'
-cv_s1 = '/home/data/albert/DB/WHAMR_early_v2/wav16k/min/cv/s1_reverb'
-cv_s2 = '/home/data/albert/DB/WHAMR_early_v2/wav16k/min/cv/s2_reverb'
+cv_mix = '/home/data/albert/DB/wsj0-mix_20240828_rir/2speakers_noise/wav16k/min/cv/mix'
+cv_s1 = '/home/data/albert/DB/wsj0-mix_20240828_rir/2speakers_noise/wav16k/min/cv/s1_dry'
+cv_s2 = '/home/data/albert/DB/wsj0-mix_20240828_rir/2speakers_noise/wav16k/min/cv/s2_dry'
 
 cv_mix_file = open(cv_mix_scp,'w')
 for root, dirs, files in os.walk(cv_mix):

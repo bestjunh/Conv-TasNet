@@ -2,14 +2,14 @@ import os
 
 test_mix_scp = 'albert_mix.scp'
 
-test_mix = '/home/nas3/user/albert/graduation/DB/output_v1/mixed/'
+test_mix = '/home/nas3/user/albert/graduation_nas3/DB/output_v2/mixed/'
 
 
 
 tt_mix = open(test_mix_scp,'w')
 
 for i in range(1, 101):
-    tt_mix.write(str(i) + ".wav "+ " " +test_mix+str(i)+"/x.wav")
+    tt_mix.write(str(i) + ".wav "+ " " +test_mix+str(i)+"/x_scale.wav")
     tt_mix.write('\n')
 
 # for root, dirs, files in os.walk(test_mix):
