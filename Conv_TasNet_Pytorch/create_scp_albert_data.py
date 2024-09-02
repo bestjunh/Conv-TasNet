@@ -2,7 +2,7 @@ import os
 
 test_mix_scp = 'albert_mix.scp'
 
-test_mix = '/home/nas3/user/albert/graduation/DB/output_v1/mixed/'
+test_mix = '/home/nas3/user/albert/graduation_nas3/DB/output_v2/mixed/'
 
 
 
