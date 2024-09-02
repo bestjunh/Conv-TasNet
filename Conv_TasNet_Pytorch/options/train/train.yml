@@ -12,16 +12,16 @@ datasets:
   chunk_len: 4
   chunk_size: 32000 #### fs*chunk_len
   train:
-    mix_scp: /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/tr_mix.scp
+    mix_scp: /home/albert/Conv-TasNet/Conv_TasNet_Pytorch/tr_mix.scp
     ref_scp: 
-      - /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/tr_s1.scp
-      - /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/tr_s2.scp
+      - /home/albert/Conv-TasNet/Conv_TasNet_Pytorch/tr_s1.scp
+      - /home/albert/Conv-TasNet/Conv_TasNet_Pytorch/tr_s2.scp
     sr: 16000
   val:
-    mix_scp: /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/cv_mix.scp
+    mix_scp: /home/albert/Conv-TasNet/Conv_TasNet_Pytorch/cv_mix.scp
     ref_scp: 
-      - /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/cv_s1.scp
-      - /home/albert/Albert-Conv-TasNet/Conv_TasNet_Pytorch/cv_s2.scp
+      - /home/albert/Conv-TasNet/Conv_TasNet_Pytorch/cv_s1.scp
+      - /home/albert/Conv-TasNet/Conv_TasNet_Pytorch/cv_s2.scp
     sr: 16000
 
 #### training settings: learning rate scheme, loss
@@ -33,7 +33,7 @@ train:
   logging_period: 200
   clip_norm: 200
   num_epochs: 100
-  checkpoint: Conv-TasNet-new
+  checkpoint: Conv-TasNet-new-20240903
 
 optimizer_kwargs:
   lr: !!float 1e-3

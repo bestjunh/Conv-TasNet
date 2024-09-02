@@ -135,7 +135,7 @@ for i_mm = 1:length(min_max)
             mix_name = [invwav1_name,'_',num2str(inwav1_snr),'_',invwav2_name,'_',num2str(inwav2_snr)];
             fprintf(fid_m,'%s\n',mix_name);
 
-            if exist([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/s2_dry/' mix_name '.wav'],'file') == 2
+            if exist([output_dir16k '/' min_max{i_mm} '/' data_type{i_type} '/mix/' mix_name '.wav'],'file') == 2
                 disp(['Already exist: ' num2str(i_mm) '/' num2str(length(min_max)) ' ' num2str(i_type) '/' num2str(length(data_type)) ' ' num2str(i) '/' num2str(num_files)]);
                 continue
             else
