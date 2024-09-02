@@ -21,7 +21,7 @@ addpath("functions/")
 
 if ispc
     nasPath = 'Z:/nas1_data/';
-    devDataPath = 'L:/dev60-data-mount/';
+    devDataPath = 'T:/dev60-data-mount/';
 elseif isunix
     nasPath = '/home/nas/';
     devDataPath = '/home/dev60-data-mount/';
@@ -34,7 +34,7 @@ data_type = {'tr','cv','tt'};
 wsj0root = [nasPath 'DB/wsj_wav/']; % YOUR_PATH/, the folder containing wsj0/
 noiseroot = [nasPath 'user/Uihyeop/DB/wham_noise/'];
 rirroot = [devDataPath 'albert/DB/CONV-TASNet-RIR-v2/'];
-output_dir16k=[devDataPath 'albert/DB/wsj0-mix_20240831_rir/2speakers_noise/wav16k/'];
+output_dir16k=[devDataPath 'albert/DB/wsj0-mix_20240903_rir/2speakers_noise/wav16k/'];
 
 min_max = {'min'};%{'min','max'};
 upFs = 3*16000;
@@ -246,9 +246,9 @@ for i_mm = 1:length(min_max)
             noise_up_rir = zeros(min(length(s1_up),length(s2_up)),NNoise);
             noise_16k_rir = zeros(min(length(s1_16k),length(s2_16k)),NNoise);
             for src = 1:NNoise
-                tmp_up = resample(noise(:,src),upFs,fs);
-                noise_up_rir(:,src) = tmp_up;
-                noise_16k_rir(:,src) = resample(tmp_up,fs,upFs);
+                tmp_up = resample(noise(:,src),upFs,fs);                
+                noise_up_rir(:,src) = fft_filter(h_noise{src},1,tmp_up);
+                noise_16k_rir(:,src) = resample(noise_up_rir(:,src),fs,upFs);
             end
 
             
