@@ -12,9 +12,9 @@ train_mix = '/home/dev60-data-mount/albert/DB/wsj0-mix_20240903_rir/2speakers_no
 train_s1 = '/home/dev60-data-mount/albert/DB/wsj0-mix_20240903_rir/2speakers_noise/wav16k/min/tr/s1_early'
 train_s2 = '/home/dev60-data-mount/albert/DB/wsj0-mix_20240903_rir/2speakers_noise/wav16k/min/tr/s2_early'
 
-test_mix = '/home/dev60-data-mount/albert/DB/wsj0-mix_20240903_rir/2speakers_noise/wav16k/min/tt/mix'
-test_s1 = '/home/dev60-data-mount/albert/DB/wsj0-mix_20240903_rir/2speakers_noise/wav16k/min/tt/s1_early'
-test_s2 = '/home/dev60-data-mount/albert/DB/wsj0-mix_20240903_rir/2speakers_noise/wav16k/min/tt/s2_early'
+test_mix = '/home/dev60-data-mount/albert/DB/wsj0-mix_20240904_rir_mch_v3/2speakers_noise/wav16k/RT0.3/min/tt/mix'
+test_s1 = '/home/dev60-data-mount/albert/DB/wsj0-mix_20240904_rir_mch_v3/2speakers_noise/wav16k/RT0.3/min/tt/s1_early'
+test_s2 = '/home/dev60-data-mount/albert/DB/wsj0-mix_20240904_rir_mch_v3/2speakers_noise/wav16k/RT0.3/min/tt/s2_early'
 
 tr_mix = open(train_mix_scp,'w')
 for root, dirs, files in os.walk(train_mix):

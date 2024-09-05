@@ -39,7 +39,7 @@ Conv-TasNet: Surpassing Ideal Time-Frequency Magnitude Masking for Speech Separa
 ### Inference this model
 - Inference Command (Use this command if you need to test a **large number** of audio files.)
    ```python
-  python Separation.py -mix_scp tt_mix.scp -yaml ./options/train/train.yml -model Conv-TasNet-new/best.pt -gpuid 0,1 -save_path ./checkpoint
+  python Separation.py -mix_scp tt_mix.scp -yaml ./options/train/train.yml -model Conv-TasNet-new-20240903/best.pt -gpuid 0 -save_path /home/dev60-data-mount/albert/output/ConvTasNet-MATLAB-RIR-20240903
    ```
 - Inference Command (Use this command if you need to test a **single** audio files.)
 
